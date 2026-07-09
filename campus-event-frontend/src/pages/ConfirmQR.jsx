@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/Dashboardlayout";
 import api from "../services/api";
 
 function ConfirmQR() {

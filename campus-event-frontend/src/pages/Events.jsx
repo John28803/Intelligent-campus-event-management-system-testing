@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/Dashboardlayout";
 import EventCard from "../components/EventCard";
 import api from "../services/api";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../services/api";
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/Dashboardlayout";
 
 function Recommendations() {
   const [events, setEvents] = useState([]);

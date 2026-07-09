@@ -1,5 +1,5 @@
 import DashboardLayout
-from "../layouts/DashboardLayout";
+from "../layouts/Dashboardlayout";
 
 function Certificates() {
 
