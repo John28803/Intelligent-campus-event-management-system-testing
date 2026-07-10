@@ -1,18 +1,24 @@
-import pandas as pd
-
-from sklearn.linear_model import LinearRegression
-
 from events.models import Event
 from attendance.models import Attendance
 
+try:
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+    SKLEARN_AVAILABLE = True
+except Exception:
+    pd = None
+    LinearRegression = None
+    SKLEARN_AVAILABLE = False
+
 def build_dataset():
+    if not SKLEARN_AVAILABLE or pd is None:
+        return None
 
     events = Event.objects.all()
 
     data = []
 
     for event in events:
-
         actual_attendance = Attendance.objects.filter(
             event=event,
             checked_in=True
@@ -41,26 +47,20 @@ def build_dataset():
     )
 
 def train_model():
-
     df = build_dataset()
 
-    if len(df) < 2:
+    if not df or len(df) < 2 or not SKLEARN_AVAILABLE or LinearRegression is None:
         return None
 
-    X = df[
-        ['capacity', 'category']
-    ]
-
+    X = df[['capacity', 'category']]
     y = df['attendance']
 
     model = LinearRegression()
-
     model.fit(X, y)
 
     return model
 
 def predict_event_attendance(event):
-
     model = train_model()
 
     if not model:
@@ -73,11 +73,5 @@ def predict_event_attendance(event):
         'education': 4
     }.get(event.category, 0)
 
-    prediction = model.predict([
-        [
-            event.capacity,
-            category_value
-        ]
-    ])
-
+    prediction = model.predict([[event.capacity, category_value]])
     return round(prediction[0])
