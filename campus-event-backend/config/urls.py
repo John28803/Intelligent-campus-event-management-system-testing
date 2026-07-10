@@ -20,6 +20,7 @@ from django.urls import include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from users.views import InviteCodeView, RegisterView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -30,6 +31,18 @@ urlpatterns = [
     path(
         'admin/',
         admin.site.urls
+    ),
+
+    path(
+        'api/register/',
+        RegisterView.as_view(),
+        name='register_short'
+    ),
+
+    path(
+        'api/admin/invite-codes/',
+        InviteCodeView.as_view(),
+        name='invite_codes_short'
     ),
 
     path(

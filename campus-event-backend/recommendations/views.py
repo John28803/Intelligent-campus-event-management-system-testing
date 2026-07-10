@@ -12,25 +12,22 @@ class RecommendationView(APIView):
 
     def get(self, request):
 
-        recommendations = (
-            generate_recommendations(
-                request.user
-            )
-        )
-
+        recommendations = generate_recommendations(request.user)
         result = []
 
         for event, score in recommendations:
-
             result.append({
                 "id": event.id,
                 "title": event.title,
+                "description": event.description,
                 "category": event.category,
                 "venue": event.venue,
-                "score": round(
-                    float(score),
-                    3
-                )
+                "date": event.date,
+                "time": event.time,
+                "capacity": event.capacity,
+                "tags": event.tags,
+                "target_audience": event.target_audience,
+                "score": round(float(score), 3),
             })
 
         return Response(result)

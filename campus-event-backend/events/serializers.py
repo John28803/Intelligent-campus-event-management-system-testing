@@ -18,6 +18,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     event_title = serializers.CharField(source='event.title', read_only=True)
     event_date = serializers.DateField(source='event.date', read_only=True)
     event_time = serializers.TimeField(source='event.time', read_only=True)
+    checked_in = serializers.SerializerMethodField()
 
     class Meta:
         model = Registration
@@ -43,3 +44,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         img.save(buffered, format="PNG")
         img_b64 = base64.b64encode(buffered.getvalue()).decode()
         return f"data:image/png;base64,{img_b64}"
+
+    def get_checked_in(self, obj):
+        attendance = Attendance.objects.filter(user=obj.user, event=obj.event).first()
+        return bool(attendance and attendance.checked_in)
