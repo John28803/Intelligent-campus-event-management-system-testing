@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, EmailOrUsernameTokenObtainPairSerializer
 from .models import User
 from .models import OrganizerInviteCode
 from rest_framework.views import APIView
@@ -7,15 +7,29 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 import secrets
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(generics.CreateAPIView):
     """Public registration endpoint. Admin role is blocked by serializer validation."""
 
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CsrfExemptTokenObtainPairView(TokenObtainPairView):
+    serializer_class = EmailOrUsernameTokenObtainPairSerializer
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CsrfExemptTokenRefreshView(TokenRefreshView):
+    pass
 
 
 class ProfileView(APIView):

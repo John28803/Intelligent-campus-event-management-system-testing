@@ -20,12 +20,7 @@ from django.urls import include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users.views import InviteCodeView, RegisterView
-
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from users.views import InviteCodeView, RegisterView, CsrfExemptTokenObtainPairView, CsrfExemptTokenRefreshView
 urlpatterns = [
 
     path(
@@ -57,12 +52,12 @@ urlpatterns = [
 
     path(
         'api/token/',
-        TokenObtainPairView.as_view()
+        CsrfExemptTokenObtainPairView.as_view()
     ),
 
     path(
         'api/token/refresh/',
-        TokenRefreshView.as_view()
+        CsrfExemptTokenRefreshView.as_view()
     ),
     
     path(

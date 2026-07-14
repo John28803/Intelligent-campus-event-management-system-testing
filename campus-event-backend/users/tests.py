@@ -71,3 +71,47 @@ class FrontendApiCompatibilityTests(TestCase):
 
         self.assertEqual(response.status_code, 201, response.content)
         self.assertEqual(OrganizerInviteCode.objects.count(), 1)
+
+    def test_token_endpoint_accepts_browser_style_requests(self):
+        User.objects.create_user(
+            username='jwt-login-user',
+            email='jwt-login@example.com',
+            password='StrongPassword123!',
+            role='student',
+        )
+
+        response = self.client.post(
+            '/api/token/',
+            data=json.dumps({
+                'username': 'jwt-login-user',
+                'password': 'StrongPassword123!',
+            }),
+            content_type='application/json',
+            HTTP_ORIGIN='http://localhost:5173',
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn('access', response.json())
+        self.assertIn('refresh', response.json())
+
+    def test_token_endpoint_accepts_email_login(self):
+        User.objects.create_user(
+            username='email-login-user',
+            email='email-login@example.com',
+            password='StrongPassword123!',
+            role='student',
+        )
+
+        response = self.client.post(
+            '/api/token/',
+            data=json.dumps({
+                'username': 'email-login@example.com',
+                'password': 'StrongPassword123!',
+            }),
+            content_type='application/json',
+            HTTP_ORIGIN='http://localhost:5173',
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIn('access', response.json())
+        self.assertIn('refresh', response.json())

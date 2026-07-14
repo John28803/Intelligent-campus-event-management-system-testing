@@ -47,8 +47,9 @@ function Login() {
       alert("Login Successful");
       navigate(getDashboardPath(userData.role));
     } catch (error) {
-      console.error("Login failed", error);
-      alert("Invalid Credentials");
+      const backendMessage = error.response?.data?.detail || error.response?.data || error.message;
+      console.error("Login failed", backendMessage || error);
+      alert(typeof backendMessage === "string" ? backendMessage : "Invalid Credentials");
     }
   };
 
@@ -60,10 +61,9 @@ function Login() {
 
         <div className="space-y-5">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">Username</label>
-            <input
-              placeholder="Username"
-              value={username}
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">Username or Email</label>
+              <input
+                placeholder="Username or email"
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-gray-400 bg-gray-50"
             />

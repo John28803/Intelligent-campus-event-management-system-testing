@@ -1,84 +1,118 @@
 import React, { useEffect, useState } from "react";
+import EventCard from "../components/EventCard";
 import api from "../services/api";
 import DashboardLayout from "../layouts/Dashboardlayout";
 
 function Recommendations() {
   const [events, setEvents] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(null);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [eventsRes, regsRes] = await Promise.all([
+        api.get("events/"),
+        api.get("events/registrations/"),
+      ]);
+
+      const allEvents = eventsRes.data || [];
+      const regs = regsRes.data || [];
+      setEvents(allEvents);
+      setRegistrations(regs);
+
+      if (regs.length >= 10) {
+        const recRes = await api.get("recommendations/");
+        setRecommendations(recRes.data || []);
+        setMessage(
+          "Personalized recommendations are now available based on your event history."
+        );
+      } else {
+        const registeredIds = regs.map((reg) => reg.event);
+        const featuredEvents = allEvents.filter(
+          (event) => !registeredIds.includes(event.id)
+        );
+        setRecommendations(featuredEvents.slice(0, 5));
+        setMessage(
+          `Register for ${10 - regs.length} more events to unlock personalized recommendations.`
+        );
+      }
+      setError(null);
+    } catch (err) {
+      setError("Unable to load recommendations. Please refresh the page.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.get("recommendations/")
-      .then((res) => {
-        setEvents(res.data);
-      })
-      .catch((err) => {
-        console.log("Backend offline or empty, using fallbacks:", err);
-      });
+    loadData();
   }, []);
 
-  
-  const displayEvents = events.length > 0 ? events : [
-    {
-      id: 1,
-      title: "Advanced React & Vite Workshop",
-      category: "Tech",
-      score: "98% Match",
-      description: "Based on your interest in front-end web app design layouts."
-    },
-    {
-      id: 2,
-      title: "UI/UX Design Systems Seminar",
-      category: "Design",
-      score: "92% Match",
-      description: "Enhance your dashboard interfaces with elite styling tips."
-    },
-    {
-      id: 3,
-      title: "Campus Networking Mixer",
-      category: "Social",
-      score: "85% Match",
-      description: "Connect with fellow developers, engineers, and project teams."
+  const refreshData = async () => {
+    await loadData();
+  };
+
+  const handleRegister = async (eventId) => {
+    try {
+      await api.post("events/registrations/", { event: eventId });
+      await refreshData();
+      alert("You are registered for this event. Your QR code is now available.");
+    } catch (err) {
+      const message =
+        err.response?.data?.detail || err.response?.data?.message || err.message;
+      alert(`Registration failed: ${message}`);
     }
-  ];
+  };
+
+  const handleUnregister = async (registrationId) => {
+    try {
+      await api.delete(`events/registrations/${registrationId}/`);
+      await refreshData();
+      alert("Your registration has been removed.");
+    } catch (err) {
+      alert("Unable to unregister. Please try again.");
+    }
+  };
+
+  const getRegistration = (event) =>
+    registrations.find((reg) => reg.event === event.id);
 
   return (
     <DashboardLayout>
       <div className="p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
-          Recommended Events
-        </h1>
-        <p className="text-sm text-gray-500 mb-8">
-          AI-driven event suggestions tailored to your student activity profile.
-        </p>
+        <div className="mb-6">
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
+            Recommended Events
+          </h1>
+          <p className="text-sm text-gray-500 mb-2">
+            {message || "Explore campus events selected for you."}
+          </p>
+          <p className="text-sm text-gray-500">
+            Events shown here can still be viewed and registered normally.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayEvents.map((event) => (
-            <div 
-              key={event.id} 
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider">
-                    {event.category || "General"}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
-                    {event.score || "Match Score"}
-                  </span>
-                </div>
-                
-                <h2 className="text-xl font-bold text-gray-900 mb-2">
-                  {event.title}
-                </h2>
-                
-                <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                  {event.description || "No description provided for this campus event."}
-                </p>
-              </div>
+        {loading && <p>Loading recommendations...</p>}
+        {error && <p className="text-red-600">{error}</p>}
 
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors mt-auto shadow-sm">
-                View Event Details
-              </button>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {recommendations.map((event) => (
+            <EventCard
+              key={event.id}
+              event={{
+                ...event,
+                description:
+                  event.description ||
+                  "Register to see full event details and secure your spot.",
+              }}
+              isRegistered={Boolean(getRegistration(event))}
+              onRegister={() => handleRegister(event.id)}
+              onUnregister={() => handleUnregister(getRegistration(event)?.id)}
+            />
           ))}
         </div>
       </div>

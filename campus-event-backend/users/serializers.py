@@ -1,6 +1,21 @@
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User, OrganizerInviteCode
+
+
+class EmailOrUsernameTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username = attrs.get(self.username_field)
+        if username and "@" in username:
+            try:
+                user = get_user_model().objects.get(email__iexact=username)
+                attrs[self.username_field] = user.username
+            except get_user_model().DoesNotExist:
+                pass
+        return super().validate(attrs)
+
 
 class RegisterSerializer(serializers.ModelSerializer):
 

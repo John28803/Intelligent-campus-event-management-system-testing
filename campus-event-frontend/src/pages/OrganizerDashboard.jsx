@@ -26,6 +26,16 @@ function OrganizerDashboard() {
           <h2 className="text-xl font-semibold text-green-600">Attendees</h2>
           <p className="text-gray-600 mt-2">Track event registrations and attendance in real time.</p>
         </div>
+        <div className="bg-white p-6 rounded-xl shadow col-span-1 md:col-span-2">
+          <h2 className="text-xl font-semibold text-purple-600">Scan Student QR</h2>
+          <p className="text-gray-600 mt-2">Use the app to scan the student's QR code and confirm attendance instantly.</p>
+          <Link
+            to="/organizer/checkin"
+            className="inline-flex items-center mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+          >
+            Go to QR Scanner
+          </Link>
+        </div>
       </div>
     </DashboardLayout>
   );
