@@ -147,7 +147,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://intelligent-campus-event-management/.vercel.app",
 ]
-]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
