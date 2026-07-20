@@ -1,4 +1,7 @@
 django
 django-cors-headers
 djangorestframework
+djangorestframework-simplejwt
+Pillow
+qrcode
 gunicorn==22.0.0
