@@ -10,7 +10,6 @@ const api = axios.create({
   },
 });
 
-export default api;
 
 const api = axios.create({
   baseURL: "/api/"
